@@ -1,6 +1,6 @@
 {
 	"name": "p9813",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "GPIO driver for P9813-based chainable RGB LED strip driver modules",
 	"main": "index.js",
 	"type": "module",
