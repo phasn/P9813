@@ -31,27 +31,26 @@ npm rebuild
 
 ## Usage
 
+General usage examples:
+
 ```js
 import {P9813} from 'p9813';
 
 const chain = new P9813({ datPin:532, clkPin:533, chainLength:3 });
 
 
-// Set the color of a single module
+// Set the color of individual modules
 chain[0].setColor('#ff0000');// Set the 1st module in the chain to red, using a hex code string for the input
 chain.setColor(1, [0,255,0]);// Set the 2nd module in the chain to green, using a color array for the input
 chain.setColor(2, {r:0, g:0, b:255});// Set the 3rd module in the chain to blue, using a color object for the input
 
-
-// Get the current color of a single module
+// Get the current color of individual modules
 chain.getColor(0);// Returns [255, 0, 0]
 chain.getColor(1, 'obj');// Returns {r:0, g:255, b:0}
 chain[2].getColor('hex');// Returns "#0000FF"
 
-
 // Set the color of all modules in the chain at once
 chain.setColorAll('#ffffff');// Set all modules to white
-
 
 // Reset modules, close chain, and free up GPIO pins
 chain.terminate();//
@@ -69,16 +68,22 @@ Represents a chain of P9813 modules. At minimum, the options object must include
 - name - Helpful for debugging when using more than one chain at a time. Defaults to 'P9813 Chain'.
 - delay - Clock delay in milliseconds. Some boards and chips may send GPIO signals too quickly for modules to process, resulting in modules (usually ones further down in longer chains) occasionally missing commands. Adding delay in the driver's clock method may help with this. Defaults to 0.
 
+```js
+import {P9813} from 'p9813';
+
+const chain = new P9813({ datPin:531, clkPin:538 });
+const chain2 = new P9813({ datPin:532, clkPin:533, chainLength:4, name:'Chain 2', delay:0 });
+```
+
 #### P9813.setColor(index, color)
 Set the color of a single module.
 - index - Chain index of the target module (0 = first module, 1 = second module, etc.)
 - color - Color to set module to. May be in the form of a hex code string, a [r, g, b] color array, or a {r, g, b} color object.
 
 ```js
-import {P9813} from 'p9813';
-
-const chain1 = new P9813({ datPin:531, clkPin:538 });
-const chain2 = new P9813({ datPin:532, clkPin:533, chainLength:4, name:'Chain 2', delay:0 });
+chain.setColor(0, [0,255,0]);// Set the 1st module in the chain to green, using a color array for the input
+chain.setColor(0, [0,255,0]);// Set the 1st module in the chain to green, using a color array for the input
+chain.setColor(0, [0,255,0]);// Set the 1st module in the chain to green, using a color array for the input
 ```
 
 #### P9813.getColor(index, format)
@@ -86,25 +91,29 @@ Get the current color of a single module.
 - index - Chain index of the target module (0 = first module, 1 = second module, etc.)
 - format - Format to return color in. Valid options include 'hex' for hex code strings, 'arr' for [r, g, b] color arrays, and 'obj' for {r, g, b} color objects. Defaults to 'arr'.
 
+```js
+chain.getColor(1, 'arr');// Return a color array of the color of the 2nd module in the chain
+chain.getColor(0);// Return the color of the 1st module in the chain (NOTE: Will default to 'arr' if no return format is specified)
+```
+
 #### P9813.setColorAll(color)
 Set all modules in the chain to the same color.
 - color - Color to set all modules to. May be in the form of a hex code string, a [r, g, b] color array, or a {r, g, b} color object.
 
+```js
+chain.setColorAll([255, 255, 255]);// Set the color of every module in the chain to white
+```
+
 #### P9813.terminate()
 Reset all modules in the chain to #000000, then unexport and free up the GPIO pins being used by the chain (chain will no longer be usable).
 
+```js
+chain.terminate();// Chain will be unusable after this
+```
+
 ### Object P9813[index]
 Represents an individual P9813 module. P9813 chain classes automatically generate child module objects at initialization equal to their own chainLength value
-
-#### P9813[index].setColor(color)
-Exact same functionality as [P9813.setColor(index, color)](p9813.setcolor(index--color)), but the index number is used as the name of a key in the parant chain rather than passed as a method parameter
-- color - Color to set module to. May be in the form of a hex code string, a [r, g, b] color array, or a {r, g, b} color object.
-
-#### P9813[index].getColor(format)
-Exact same functionality as [P9813.getColor(index, format)](p9813.getcolor(index--format)), but the index number is used as the name of a key in the parant chain rather than passed as a method parameter
-- format - Format to return color in. Valid options include 'hex', 'arr', and 'obj'. Defaults to 'arr' if no format is specified.
-
-Targeting a module through its parent chain is exactly the same as targeting the module directly
+Targeting a module through its parent chain is exactly the same as targeting the module directly.
 
 ```js
 chain.setColor(0, '#ff0000');
@@ -112,11 +121,26 @@ chain.setColor(0, '#ff0000');
 chain[0].setColor('#ff0000');
 ```
 and
-
 ```js
 chain.getColor(0, 'hex');
 // Is the same as
 chain[0].getColor('hex');
+```
+
+#### P9813[index].setColor(color)
+Exact same functionality as [P9813.setColor(index, color)](p9813.setcolor(index--color)), but the index number is used as the name of a key in the parant chain rather than passed as a method parameter
+- color - Color to set module to. May be in the form of a hex code string, a [r, g, b] color array, or a {r, g, b} color object.
+
+```js
+chain[1].setColor([0,0,255]);// Set the 2nd module in the chain to blue, using a color array for the input
+```
+
+#### P9813[index].getColor(format)
+Exact same functionality as [P9813.getColor(index, format)](p9813.getcolor(index--format)), but the index number is used as the name of a key in the parant chain rather than passed as a method parameter
+- format - Format to return color in. Valid options include 'hex', 'arr', and 'obj'. Defaults to 'arr' if no format is specified.
+
+```js
+chain[2].getColor('hex');// Return a hex code string of the color of the 3rd module in the chain
 ```
 
 ## Troubleshooting & Common Issues
