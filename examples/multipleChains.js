@@ -1,0 +1,44 @@
+import {P9813} from '../index.js';
+
+const sleep_ms = ms => {
+	if(ms===undefined) throw new Error('TypeError: sleep_ms() takes exactly one argument (0 given)');
+	let endTime = +new Date() + parseInt(ms);
+	while(+new Date() < endTime);
+};
+
+
+const chain1 = new P9813({ datPin:532, clkPin:533, chainLength:2, name:'Chain 1', delay:0 });
+const chain2 = new P9813({ datPin:531, clkPin:538, chainLength:2, name:'Chain 2', delay:0 });
+
+
+console.log('Setting color of chain 1 to red');
+chain1.setColorAll('#FF0000');
+console.log('Setting color of chain 2 to cyan');
+chain2.setColorAll('#00FFFF');
+sleep_ms(1000);
+
+
+console.log('Rotating colors...');
+chain1.setColorAll('#FFFF00');
+chain2.setColorAll('#0000FF');
+sleep_ms(500);
+
+chain1.setColorAll('#00FF00');
+chain2.setColorAll('#FF00FF');
+sleep_ms(500);
+
+chain1.setColorAll('#00FFFF');
+chain2.setColorAll('#FF0000');
+sleep_ms(500);
+
+chain1.setColorAll('#0000FF');
+chain2.setColorAll('#FFFF00');
+sleep_ms(500);
+
+chain1.setColorAll('#FF00FF');
+chain2.setColorAll('#00FF00');
+sleep_ms(500);
+
+chain1.setColorAll('#FF0000');
+chain2.setColorAll('#00FFFF');
+sleep_ms(2500);
