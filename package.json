@@ -1,6 +1,6 @@
 {
 	"name": "p9813",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "GPIO driver for P9813-based chainable RGB LED strip driver modules",
 	"main": "index.js",
 	"type": "module",
@@ -12,7 +12,7 @@
 	"scripts":{
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
-	"author": "phasn",
+	"author": "phasn <phasn@proton.me> (https://github.com/phasn)",
 	"license": "MIT",
 	"dependencies":{
 		"onoff": "^6.0.3",

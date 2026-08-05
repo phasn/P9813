@@ -1,7 +1,7 @@
 import {P9813} from '../index.js';
 
 const sleep_ms = ms => {
-	if(ms===undefined) throw new Error('TypeError: sleep_ms() takes exactly one argument (0 given)');
+	if(ms===undefined) return console.error('sleep_ms() takes exactly one argument (0 given)');
 	let endTime = +new Date() + parseInt(ms);
 	while(+new Date() < endTime);
 };
@@ -43,10 +43,10 @@ console.log('Setting color of all modules in chain to gray');
 p9813Chain.setColorAll('#808080');
 sleep_ms(1000);
 
-console.log('Setting color of all modules in chain to silver');
-p9813Chain.setColorAll('#C0C0C0');
-sleep_ms(1000);
-
 console.log('Setting color of all modules in chain to white');
 p9813Chain.setColorAll('#FFFFFF');
 sleep_ms(2500);
+
+
+console.log('Terminating...');
+p9813Chain.terminate();

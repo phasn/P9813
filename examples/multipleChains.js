@@ -1,13 +1,15 @@
 import {P9813} from '../index.js';
 
 const sleep_ms = ms => {
-	if(ms===undefined) throw new Error('TypeError: sleep_ms() takes exactly one argument (0 given)');
+	if(ms===undefined) return console.error('sleep_ms() takes exactly one argument (0 given)');
 	let endTime = +new Date() + parseInt(ms);
 	while(+new Date() < endTime);
 };
 
 
+// GPIO line numbers 532 and 533 correspond with physical pins 38 (GPIO 20) and 40 (GPIO 21) on a Raspberry Pi Zero 2 W installed with Raspberry Pi OS (Debian) 13
 const chain1 = new P9813({ datPin:532, clkPin:533, chainLength:2, name:'Chain 1', delay:0 });
+// GPIO line numbers 531 and 538 correspond with physical pins 35 (GPIO 19) and 37 (GPIO 26) on a Raspberry Pi Zero 2 W installed with Raspberry Pi OS (Debian) 13
 const chain2 = new P9813({ datPin:531, clkPin:538, chainLength:2, name:'Chain 2', delay:0 });
 
 
@@ -42,3 +44,8 @@ sleep_ms(500);
 chain1.setColorAll('#FF0000');
 chain2.setColorAll('#00FFFF');
 sleep_ms(2500);
+
+
+console.log('Terminating...');
+chain1.terminate();
+chain2.terminate();
