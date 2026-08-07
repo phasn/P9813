@@ -8,6 +8,8 @@
 
 JavaScript GPIO bit-bang driver for chainable P9813 non-addressable LED strip controller modules from various companies such as Open-Smart, DIY More, Seeed Studio, etc.
 
+![Assorted P9813 Modules](https://github.com/phasn/P9813/blob/main/examples/P9813ModuleAssortment.png "Assortment of common chainable P9813 modules")
+
 ## Contents
 
 - [Installation](#installation)
