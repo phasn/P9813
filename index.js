@@ -2,7 +2,11 @@ import process			from 'node:process';
 import {Gpio}			from 'onoff';
 import {convertColor}	from 'rgbcct-color-handler';
 
-const sleep_ms = ms => new Promise(r => setTimeout(r, ms));
+const sleepAtomic = ms => {
+	const sab = new SharedArrayBuffer(4);
+	const int32 = new Int32Array(sab);
+	Atomics.wait(int32, 0, 0, ms);
+};
 
 
 export class P9813{
@@ -13,11 +17,11 @@ export class P9813{
 		this.DAT = datPin instanceof Gpio && datPin.direction()==='out'	? datPin
 				 : Number.isInteger(datPin) && datPin>=0				? new Gpio(datPin, 'out')
 				 :														new Error('Error: Data pin number either invalid or not specified.');
+		if(this.DAT instanceof Error) throw this.DAT;
 
 		this.CLK = clkPin instanceof Gpio && clkPin.direction()==='out'	? clkPin
 				 : Number.isInteger(clkPin) && clkPin>=0				? new Gpio(clkPin, 'out')
 				 :														new Error('Error: Clock pin number either invalid or not specified.');
-		if(this.DAT instanceof Error) throw this.DAT;
 		if(this.CLK instanceof Error) throw this.CLK;
 
 		this.chainLength	= chainLength;
@@ -146,9 +150,9 @@ export class P9813{
 
 	#clock(){
 		this.CLK.writeSync(0);
-		await sleep_ms(this.delay);
+		sleepAtomic(this.delay);
 		this.CLK.writeSync(1);
-		await sleep_ms(this.delay);
+		sleepAtomic(this.delay);
 	};
 
 	#writeToModule(r, g, b){
