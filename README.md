@@ -6,7 +6,7 @@
 > [!IMPORTANT]
 > GPIO implementation can vary significantly from device to device, OS to OS, and in some cases, between different versions of the same OS on the same device. Because of this, figuring out the right pin numbering system/formula to use may take a bit of trial and error.
 
-JavaScript GPIO bit-bang driver for chainable P9813 non-addressable LED strip controller modules from various companies such as Open-Smart, DIY More, Seeed Studio, etc. Although P9813 chips can drive LEDs strips up to 24V, it seems as though most modules on the market have been designed primarily with 12V in mind.
+JavaScript GPIO bit-bang driver for chainable P9813 non-addressable LED strip controller modules from various companies such as Open-Smart, DIY More, Seeed Studio, etc.
 
 ## Contents
 
@@ -31,7 +31,9 @@ npm rebuild
 
 ## Usage
 
-General usage examples:
+A number of more detailed [example scripts](https://github.com/phasn/P9813/tree/main/examples) are available in the [github repo](https://github.com/phasn/P9813) (you'll need to adjust the pin numbers and chain lengths to reflect your specific setup).
+
+### General usage:
 
 ```js
 import {P9813} from 'p9813';
@@ -56,11 +58,10 @@ chain.setColorAll('#ffffff');// Set all modules to white
 chain.terminate();// The chain will become unusable after this
 ```
 
-A number of more detailed [example scripts](https://github.com/phasn/P9813/tree/main/examples) have been included as well. If you want to try directly running one yourself, you'll need to adjust the pin numbers and chain lengths used in each to reflect your specific setup.
-
 ## API
 
 #### Class P9813({options})
+
 - datPin - EITHER: An [onoff Gpio instance](https://www.npmjs.com/package/onoff#class-gpio) of the data pin with a direction of 'out', OR: the data pin's GPIO line number.
 - clkPin - EITHER: An [onoff Gpio instance](https://www.npmjs.com/package/onoff#class-gpio) of the clock pin with a direction of 'out', OR: the clock pin's GPIO line number.
 - chainLength - Total number of modules in the chain. Defaults to 1.
@@ -89,6 +90,7 @@ const chain = new P9813({ datPin:dataGPIO, clkPin:clockGPIO });
 ```
 
 ##### P9813.setColor(index, color)
+
 - index - Chain index of the target module (0 = first module, 1 = second module, etc.)
 - color - Color to set module to. May be in the form of a hex code string, a [r, g, b] color array, or a {r, g, b} color object.
 
@@ -99,6 +101,7 @@ chain.setColor(0, [0,255,0]);// Set the 1st module in the chain to green, using 
 ```
 
 ##### P9813.getColor(index, format)
+
 - index - Chain index of the target module (0 = first module, 1 = second module, etc.)
 - format - Format to return color in. Valid options include 'hex' for hex code strings, 'arr' for [r, g, b] color arrays, and 'obj' for {r, g, b} color objects. Defaults to 'arr'.
 
@@ -110,6 +113,7 @@ chain.getColor(0);// Return the color of the 1st module in the chain (NOTE: Will
 ```
 
 ##### P9813.setColorAll(color)
+
 - color - Color to set all modules to. May be in the form of a hex code string, a [r, g, b] color array, or a {r, g, b} color object.
 
 Set all modules in the chain to the same color.
@@ -127,6 +131,7 @@ chain.terminate();// Chain will be unusable after this
 ```
 
 #### Object P9813[index]
+
 - index - Chain index of the target module (0 = first module, 1 = second module, etc.)
 
 Represents an individual P9813 module. P9813 chain classes automatically generate child module objects at initialization equal to their own chainLength value. Targeting a module through its parent chain is exactly the same as targeting the module directly.
@@ -144,6 +149,7 @@ chain[0].getColor('hex');
 ```
 
 ##### P9813[index].setColor(color)
+
 - color - Color to set module to. May be in the form of a hex code string, a [r, g, b] color array, or a {r, g, b} color object.
 
 Exact same functionality as [P9813.setColor(index, color)](#p9813setcolorindex-color), but the index number is used as the name of a key in the parant chain rather than passed as a method parameter
@@ -153,6 +159,7 @@ chain[1].setColor([0,0,255]);// Set the 2nd module in the chain to blue, using a
 ```
 
 ##### P9813[index].getColor(format)
+
 - format - Format to return color in. Valid options include 'hex', 'arr', and 'obj'. Defaults to 'arr' if no format is specified.
 
 Exact same functionality as [P9813.getColor(index, format)](#p9813getcolorindex-format), but the index number is used as the name of a key in the parant chain rather than passed as a method parameter
@@ -163,7 +170,11 @@ chain[2].getColor('hex');// Return a hex code string of the color of the 3rd mod
 
 ## Troubleshooting & Common Issues
 
-### Error: EINVAL (Invalid GPIO Pin Number)
+### Note Regarding Power Rating
+
+It's worth mentioning that, although the official P9813 datasheet mentions that the chip itself can drive LEDs up to 24V, most modules on the market that integrate it seem to be designed to handle up to 12V.
+
+### Error: EINVAL (Invalid GPIO pin number)
 
 If you're seeing an error similar to this,
 ```
@@ -173,9 +184,9 @@ node:fs:2914
 
 Error: EINVAL: invalid argument, write
 ```
-it usually means the system can't find any GPIO pins with the pin numbers you specified.
+it usually means the system can't find any GPIO pins with the line numbers you specified.
 
-### Error: Could not locate the bindings file (NPM Approval Needed)
+### Error: Could not locate the bindings file (NPM approval needed)
 
 If you're seeing an error similar to this,
 ```
@@ -185,7 +196,7 @@ If you're seeing an error similar to this,
 
 Error: Could not locate the bindings file. Tried:
 ```
-NPM needs you to approve the post-install build scripts for packages like `epoll` (see [Installation](#installation)).
+NPM needs you to approve and re-run the post-install build scripts for certain dependencies (in this case, `epoll`, used by `onoff`). Refer to [Installation](#installation).
 
 ### User doesn't have correct permissions
 
@@ -195,14 +206,37 @@ WIP
 
 WIP
 
-### Driver works properly once but fails on subsequent attempts until reboot
+### Driver works properly once but fails on subsequent attempts until reboot (Missing GPIO unexport permissions OR Unusual board-specific GPIO implementation)
 
-WIP
+This behavior suggests one of the following:
+- You have the correct permissions to open a GPIO pin, but for whatever reason you don't have the permissions needed to unexport/close or overwrite/take control of an in-use GPIO pin
+- Your board has an unusual method for freeing up GPIO instances that `onoff` doesn't support. Subsequent attempts to use the driver are failing because it thinks the pins are already in use by something else which it isn't able to take control from.
+
+A permanent solution for the latter can be tricky because it depends on how your board has implemented GPIO (if you're running into this issue, there's probably already some non-standard implementation going on).
+The former, however, can be easily solved by running your script as superuser/administrator, or briefly re-opening and closing the pin as superuser/admin between uses with a script like the following:
+```js
+// (Run this as superuser)
+import {Gpio} from 'onoff';
+const problemPinNumber = 123;// Replace with your pin number
+const problemGPIO = new Gpio(problemPinNumber, 'out');// Should be able to take control of the active pin
+problemGPIO.unexport();
+```
+
+A helpful cli script that accomplishes this has been added as of v1.0.3. To use it, run the following, adjusting for your target GPIO number:
+
+```sh
+# Replace 123 with the target GPIO line number
+sudo npm run forceUnexport "123"
+```
+or
+```sh
+# Replace 123 with the target GPIO line number
+sudo node ./forceUnexport.js "123"
+```
 
 ## To-Do
 
 - Expand Troubleshooting & Common Issues section
-- Add CLI tool for force-unexporting GPIO pins
 - Add CLI tool to help with figuring out line numbers
 
 ## License

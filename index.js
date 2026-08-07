@@ -2,11 +2,7 @@ import process			from 'node:process';
 import {Gpio}			from 'onoff';
 import {convertColor}	from 'rgbcct-color-handler';
 
-const sleep_ms = ms => {
-	if(ms===undefined) return console.error('sleep_ms() takes exactly one argument (0 given)');
-	let endTime = +new Date() + parseInt(ms);
-	while(+new Date() < endTime);
-};
+const sleep_ms = ms => new Promise(r => setTimeout(r, ms));
 
 
 export class P9813{
@@ -112,7 +108,8 @@ export class P9813{
 	};
 
 	// P9813 chips have no functionality for returning
-	// data, so the update buffer is referenced instead
+	// data, so the write buffer is saved and referenced
+	// between writes instead
 	#updateBuffer(index, color){
 		if(index===undefined) return console.error('Exception: Unable to update the write buffer because no module number was specified.');
 		if(color===undefined) return console.error('Exception: Unable to update the write buffer because no color was specified.');
@@ -149,9 +146,9 @@ export class P9813{
 
 	#clock(){
 		this.CLK.writeSync(0);
-		sleep_ms(this.delay);
+		await sleep_ms(this.delay);
 		this.CLK.writeSync(1);
-		sleep_ms(this.delay);
+		await sleep_ms(this.delay);
 	};
 
 	#writeToModule(r, g, b){
